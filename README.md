@@ -7,7 +7,7 @@
 **Members**:
 
 1. Guru Pranav - 240051009
-2. Price - 240001055
+2. Prince Nagar - 240001055
 3. Vimal - 240003086
 4. Ramesh - 240001058
 
@@ -56,3 +56,4 @@ python -m tests.test_scenarios
 ```
 
 Expected output: 10/10 tests passing.
+
