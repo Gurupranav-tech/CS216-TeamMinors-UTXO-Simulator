@@ -1,5 +1,6 @@
-from transaction import Transaction
-from utxo_manager import UTXOManager
+from src.transaction import Transaction
+from src.utxo_manager import UTXOManager
+from src.validator import validate_transaction
 
 
 class Mempool:
@@ -9,31 +10,19 @@ class Mempool:
         self.max_size = max_size
 
     def add_transaction(self, tx: Transaction, utxo_manager: UTXOManager) -> (bool, str):
-        for i, inp in enumerate(tx.inputs):
-            if not utxo_manager.exists(inp.prev_tx, inp.index):
-                return False, "UTXO does not exist"
+        valid, msg = validate_transaction(tx, utxo_manager, self.spent_utxos)
+        if not valid:
+            return valid, msg
 
-            for j, inp2 in enumerate(tx.inputs):
-                if i == j:
-                   continue 
-                if inp.prev_tx == inp2.prev_tx and inp2.index == inp.index:
-                    return False, f"Same UTXO added twice: ({inp.prev_tx}, {inp.index})"
-
-            if (inp.prev_tx, inp.index) in self.spent_utxos:
-                return False, f"UTXO ({inp.prev_tx}, {inp.index}) already present in spent UTXO"
-
-        for out in tx.outputs:
-            if out.amount < 0:
-                return False, f"Negative Amounts not allowed"
-
-        if len(self.transactions) >= self.max_size:
-            return False, f"Try again later. Server Busy"
+        if len(self.transactions) > self.max_size:
+            return False, "Max size of mempool reached...."
 
         self.transactions.append(tx)
+
         for inp in tx.inputs:
             self.spent_utxos.add((inp.prev_tx, inp.index))
 
-        return True, "Transaction Added Successfully"
+        return True, "Transaction Added to mempool"
         
     def remove_transaction(self, tx: str):
         transaction = None
@@ -46,9 +35,16 @@ class Mempool:
             return
         
         self.transactions.remove(transaction)
+        for inp in transaction.inputs:
+            key = (inp.prev_tx, inp.index)
+            if key in self.spent_utxos:
+                self.spent_utxos.remove(key)
         
-    def get_top_transactions(self, n: int) -> list:
+    def get_top_transactions(self, n: int=5) -> list[Transaction]:
         return self.transactions[:n]
+
+    def get_transactions(self) -> list[Transaction]:
+        return self.transactions
         
     def clear(self):
         self.transactions.clear()

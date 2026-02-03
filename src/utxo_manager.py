@@ -16,7 +16,8 @@ class UTXOManager:
 
         
     def remove_utxo(self, tx_id: str, index: int):
-        del self.utxo_set[(tx_id, index)]
+        if (tx_id, index) in self.utxo_set:
+            del self.utxo_set[(tx_id, index)]
 
     def get_balance(self, owner: str) -> float:
         balance = 0.0
@@ -35,3 +36,6 @@ class UTXOManager:
                 utxos.append( (tx_id,index,self.utxo_set[(tx_id,index)]["amount"]))
         
         return utxos
+
+    def get_utxo(self, tx_id: str, index: int) -> dict:
+        return self.utxo_set.get((tx_id, index))
