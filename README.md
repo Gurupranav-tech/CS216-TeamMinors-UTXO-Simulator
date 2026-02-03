@@ -8,7 +8,7 @@
 
 1. Guru Pranav - 240051009
 2. Prince Nagar - 240001055
-3. Vimal - 240003086
+3. Vimal Pranav - 240003086
 4. Ramesh - 240001058
 
 ## Project Description
